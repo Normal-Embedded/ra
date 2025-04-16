@@ -6,6 +6,7 @@ version = "0.2.1"
 authors = [
     "Nathan Larsen <n8tlarsen@gmail.com>",
     "Addison Heavner <addisonheavner@gmail.com>",
+    "Tri Nguyen <trongtribk06@gmail.com>",
 ]
 keywords = ["no-std", "arm", "cortex-m", "ra4", "ra", "renesas"]
 categories = ["embedded", "hardware-support", "no-std"]
