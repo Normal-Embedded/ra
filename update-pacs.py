@@ -7,11 +7,20 @@ import re
 # Define dependencies
 deps = '''
 [dependencies]
-critical-section = { version = "1.1", optional = true }
 cortex-m = "0.7"
-cortex-m-rt = { version = "0.6", optional = true }
-vcell = "0.1"
-portable-atomic = { version = "0.3", default-features = false, optional = true }
+vcell = "0.1.2"
+
+[dependencies.portable-atomic]
+optional = true
+version = "0.3"
+
+[dependencies.cortex-m-rt]
+optional = true
+version = "0.7.3"
+
+[dependencies.critical-section]
+optional = true
+version = "1.1.2"
 
 [features]
 rt = ["cortex-m-rt/device"]
