@@ -1,5 +1,0 @@
-_svd: "../patch/r7fa6e10f.svd"
-
-_include: 
-  - "periph/sdhi.yaml"
-  - "periph/rtc.yaml"

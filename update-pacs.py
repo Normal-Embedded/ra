@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import sys
 import re
+from svdtools import patch as svd_patch
 
 # Define dependencies
 deps = '''
@@ -57,9 +58,21 @@ with open('svd/patch/r7fa6m5bh.svd', 'r', encoding='utf-8') as file:
 with open('svd/patch/r7fa6m5bh.svd', 'w', encoding='utf-8') as file:
     file.write(data)
 
-patches = [f for f in os.listdir('svd/device') if f != 'periph']
+patches = sorted(f for f in os.listdir('svd/device') if f.endswith(('.yaml', '.yml')))
 for patch in patches:
-    subprocess.run(['svdtools', 'patch', os.path.join('svd/device', patch)])
+    yaml_path = os.path.join('svd/device', patch)
+    print(f"==> Patching {yaml_path}")
+    try:
+        # Call svdtools.patch directly. This avoids PATH/module runner issues.
+        # Note: svdtools.patch.main expects a *string* path, not a list.
+        svd_patch.main(yaml_path)
+    except SystemExit as e:
+        code = e.code if isinstance(e.code, int) else 1
+        print(f"!! svdtools.patch failed for {patch} (exit {code}) — skipping")
+        continue
+    except Exception as e:
+        print(f"!! svdtools.patch crashed for {patch}: {e} — skipping")
+        continue
 
 # Generate PACs
 svds = [f for f in os.listdir('svd/patch') if f.endswith('.patched')]
@@ -92,5 +105,3 @@ for svd in svds:
     subprocess.run(['cargo', 'build', '--manifest-path', os.path.join(pac, 'Cargo.toml'), '--features', 'atomics'])
     print()  # Add blank line to separate status outputs
 
-# Clean up
-shutil.rmtree('svd/patch')

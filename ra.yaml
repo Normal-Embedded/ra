@@ -1,0 +1,198 @@
+# ra-ra6m5-safe.yaml
+# Tailored for Renesas RA6M5 (R7FA6M5BH) SVD
+# Goal: generate once safely, then iterate.
+
+transforms:
+  # --- Hygiene (non-destructive)
+  - !DeleteFieldsets
+      from: .*
+      useless: true
+  - !DeleteUselessEnums
+  - !Sanitize
+
+  # NOTE: Do NOT delete (Events|Tasks) for RA; that rule is Nordic-specific.
+
+  # ===== Renames & arrays (safe set) =====
+
+  # GPT (GPT32E/GPT32 variants appear as gpt0..gptN)
+  - !Rename
+      from: gpt\d+::(.*)
+      to: gpt::$1
+  - !Rename
+      from: gpt::Gpt\d+
+      to: gpt::Gpt
+  - !MakeBlock
+      blocks: gpt::Gpt
+      from: gpt(\d+)_(.+)
+      to_block: gpt::Channel
+      to_outer: ch$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: gpt::Gpt
+      from: gpt\d+
+      to: ch
+
+  # AGT (agt0..)
+  - !Rename
+      from: agt\d+::(.*)
+      to: agt::$1
+  - !Rename
+      from: agt::Agt\d+
+      to: agt::Agt
+  - !MakeBlock
+      blocks: agt::Agt
+      from: agt(\d+)_(.+)
+      to_block: agt::Channel
+      to_outer: ch$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: agt::Agt
+      from: agt\d+
+      to: ch
+
+  # SCI (sci0..)
+  - !Rename
+      from: sci\d+::(.*)
+      to: sci::$1
+  - !Rename
+      from: sci::Sci\d+
+      to: sci::Sci
+  - !MakeBlock
+      blocks: sci::Sci
+      from: sci(\d+)_(.+)
+      to_block: sci::Instance
+      to_outer: inst$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: sci::Sci
+      from: sci\d+
+      to: inst
+
+  # SPI / RSPI (spi0.. / rspi0..). Keep QSPI separate on RA6M5.
+  - !Rename
+      from: (r?spi)\d+::(.*)
+      to: spi::$2
+  - !Rename
+      from: spi::(R?spi)\d+
+      to: spi::Spi
+  - !MakeBlock
+      blocks: spi::Spi
+      from: (?:r?spi)(\d+)_(.+)
+      to_block: spi::Instance
+      to_outer: inst$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: spi::Spi
+      from: (r?spi)\d+
+      to: inst
+
+  # QSPI (if present on this part; keep as its own block to avoid collisions)
+  - !Rename
+      from: qspi\d?::(.*)
+      to: qspi::$1
+  - !Rename
+      from: qspi::Qspi\d?
+      to: qspi::Qspi
+
+  # I2C (IIC0..)
+  - !Rename
+      from: iic\d+::(.*)
+      to: iic::$1
+  - !Rename
+      from: iic::Iic\d+
+      to: iic::Iic
+  - !MakeBlock
+      blocks: iic::Iic
+      from: iic(\d+)_(.+)
+      to_block: iic::Instance
+      to_outer: inst$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: iic::Iic
+      from: iic\d+
+      to: inst
+
+  # ADC (S12ADC/ADC14x). Keep patterns loose and tolerant.
+  - !Rename
+      from: adc\w*\d+::(.*)
+      to: adc::$1
+  - !Rename
+      from: adc::Adc\w*\d+
+      to: adc::Adc
+  - !MakeBlock
+      blocks: adc::Adc
+      from: adc\w*(\d+)_(.+)
+      to_block: adc::Unit
+      to_outer: unit$1
+      to_inner: $2
+  - !MakeRegisterArray
+      blocks: adc::Adc
+      from: adc\w*\d+
+      to: unit
+  - !MakeFieldArray
+      fieldsets: adc::regs::(Cmp|Chsel|Chstat|Data|Offs).*
+      from: ch\d+
+      to: ch
+      mode: Holey
+
+  # DAC (dac0..)
+  - !Rename
+      from: dac\d+::(.*)
+      to: dac::$1
+  - !Rename
+      from: dac::Dac\d+
+      to: dac::Dac
+  - !MakeRegisterArray
+      blocks: dac::Dac
+      from: dac\d+
+      to: ch
+
+  # DTC (RA6M5 uses DTC rather than DMAC)
+  # Keep arrays safe if channels are enumerated as dtc_chX_*
+  - !Rename
+      from: dtc::(.*)
+      to: dtc::$1
+
+  # ELC (Event Link Controller) – elsr0..N
+  - !Rename
+      from: elc::(.*)
+      to: elc::$1
+  - !MakeFieldArray
+      fieldsets: elc::regs::Elsr
+      from: elsr\d+
+      to: elsr
+      mode: Holey
+
+  # USB: On RA6M5 typically USBHS. Keep rename minimal and only array ep* if they exist.
+  - !Rename
+      from: usbhs::(.*)
+      to: usb::$1
+  - !Rename
+      from: usb::Usbhs
+      to: usb::Usb
+  - !MakeFieldArray
+      fieldsets: usb::regs::(Epstatus|Epinten|Epout(en)?|Epin(en)?)
+      from: ep(\d+)
+      to: ep
+      mode: Holey
+
+  # PORT / IOPORT (PFS registers live under ioport)
+  - !Rename
+      from: ioport::(.*)
+      to: ioport::$1
+  - !MakeFieldArray
+      fieldsets: ioport::regs::Pfs.*
+      from: p(\d+)
+      to: pin
+      mode: Holey
+
+  # ===== Defer risky merges/enum deletes to the very end (or later passes) =====
+  # (ICU merges, Int(en|enset|enclr|pend) coalescing, Gtccr merges, etc.)
+
+  # Minimal final clean
+  - !Sanitize
+
+  # Optional cleanup of trivial 1-bit enums (run only after you confirm build works)
+  # - !DeleteEnums
+  #     from: (gpt|agt|sci|spi|iic|adc|dac|dtc|usb|ioport)::vals::.*
+  #     bit_size: 1

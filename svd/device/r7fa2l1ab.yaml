@@ -1,4 +1,0 @@
-_svd: "../patch/r7fa2l1ab.svd"
-
-_include: 
-  - "periph/rtc.yaml"

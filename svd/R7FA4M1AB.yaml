@@ -1,0 +1,70 @@
+transforms:
+  # --- ICU: collapse IRQCR0, IRQCR1, ... into one array + shared fieldset
+  - !MergeFieldsets
+      from: icu::regs::IRQCR\d+
+      to:   icu::regs::IRQCR
+      check: NoCheck
+
+  - !MakeRegisterArray
+      blocks: icu::Icu
+      from: ^IRQCR\d+$
+      to:   irqcr
+
+  # --- ELC: collapse ELSR0, ELSR1, ... into one array + shared fieldset
+  - !MergeFieldsets
+      from: elc::regs::ELSR\d+
+      to:   elc::regs::ELSR
+      check: NoCheck
+
+  - !MakeRegisterArray
+      blocks: elc::Elc
+      from: ^ELSR\d+$
+      to:   elsr
+
+  # --- BUSCTRL: collapse BUSSCNT0, BUSSCNT1, ... into one array + shared fieldset
+  - !MergeFieldsets
+      from: busctrl::regs::BUSSCNT\d+
+      to:   busctrl::regs::BUSSCNT
+      check: NoCheck
+
+  - !MakeRegisterArray
+      blocks: busctrl::Busctrl
+      from: ^BUSSCNT\d+$
+      to:   busscnt
+
+  # --- ADC: normalize block names (S12ADCx / ADCxxx -> adc::Adc)
+  - !Rename
+      from: adc\w*\d+::(.*)
+      to:   adc::$1
+  - !Rename
+      from: adc::Adc\w*\d+
+      to:   adc::Adc
+
+  # --- ADC: collapse ADDR0, ADDR1, ... into one array + shared fieldset
+  - !MergeFieldsets
+      from: adc::regs::ADDR\d+
+      to:   adc::regs::ADDR
+      check: NoCheck
+
+  - !MakeRegisterArray
+      blocks: adc::Adc
+      from: ^ADDR\d+$
+      to:   addr
+
+  - !MergeFieldsets
+      from: usb::regs::PIPE\d+CTR
+      to:   usb::regs::PIPECTR
+      check: NoCheck
+
+  - !MakeRegisterArray
+      blocks: usb::Usb
+      from: ^PIPE\d+CTR$
+      to:   pipectr
+
+  # Drop vendor "Reserved" fields to avoid duplicate method names
+  - !DeleteFields
+      fieldset: .*
+      from: (?i)^Reserved(\d+)?$
+
+  # optional cleanup
+  - !Sanitize

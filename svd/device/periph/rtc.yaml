@@ -1,5 +1,0 @@
-"RTC*":
-  _delete:
-    - "BCNT*"
-    - "RCR2_BCNT"
-    
