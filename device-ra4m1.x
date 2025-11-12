@@ -24,6 +24,18 @@ SECTIONS
     *(COMMON)
   } > RAM
 
+  /* defmt sections */
+  .defmt :
+  {
+    *(.defmt)
+  } > FLASH
+
+  /* RTT section for defmt_rtt */
+  .rtt :
+  {
+    *(.rtt)
+  } > RAM
+
   /DISCARD/ :
   {
     *(.ARM.exidx*)
