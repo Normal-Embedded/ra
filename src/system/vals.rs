@@ -2622,7 +2622,7 @@ impl From<Prc3> for u8 {
 pub struct Prkey(u8);
 impl Prkey {
     #[doc = "Enables writing to the PRCR register."]
-    pub const _0X5A: Self = Self(0x5a);
+    pub const _0XA5: Self = Self(0xa5);
 }
 impl Prkey {
     pub const fn from_bits(val: u8) -> Prkey {
