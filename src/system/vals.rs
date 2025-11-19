@@ -2622,7 +2622,7 @@ impl From<Prc3> for u8 {
 pub struct Prkey(u8);
 impl Prkey {
     #[doc = "Enables writing to the PRCR register."]
-    pub const _0XA5: Self = Self(0xa5);
+    pub const _0X_A5: Self = Self(0xa5);
 }
 impl Prkey {
     pub const fn from_bits(val: u8) -> Prkey {
@@ -2635,7 +2635,7 @@ impl Prkey {
 impl core::fmt::Debug for Prkey {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self.0 {
-            0x5a => f.write_str("_0X5A"),
+            0xa5 => f.write_str("_0X_A5"),
             other => core::write!(f, "0x{:02X}", other),
         }
     }
@@ -2644,7 +2644,7 @@ impl core::fmt::Debug for Prkey {
 impl defmt::Format for Prkey {
     fn format(&self, f: defmt::Formatter) {
         match self.0 {
-            0x5a => defmt::write!(f, "_0X5A"),
+            0xa5 => defmt::write!(f, "_0X_A5"),
             other => defmt::write!(f, "0x{:02X}", other),
         }
     }
