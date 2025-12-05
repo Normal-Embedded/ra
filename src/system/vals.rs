@@ -1041,6 +1041,45 @@ impl From<Flstpf> for u8 {
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Hcfrq1 {
+    #[doc = "24 MHz"]
+    _000 = 0x0,
+    _RESERVED_1 = 0x01,
+    #[doc = "32 MHz"]
+    _010 = 0x02,
+    _RESERVED_3 = 0x03,
+    #[doc = "48 MHz"]
+    _100 = 0x04,
+    #[doc = "64 MHz"]
+    _101 = 0x05,
+    _RESERVED_6 = 0x06,
+    _RESERVED_7 = 0x07,
+}
+impl Hcfrq1 {
+    #[inline(always)]
+    pub const fn from_bits(val: u8) -> Hcfrq1 {
+        unsafe { core::mem::transmute(val & 0x07) }
+    }
+    #[inline(always)]
+    pub const fn to_bits(self) -> u8 {
+        unsafe { core::mem::transmute(self) }
+    }
+}
+impl From<u8> for Hcfrq1 {
+    #[inline(always)]
+    fn from(val: u8) -> Hcfrq1 {
+        Hcfrq1::from_bits(val)
+    }
+}
+impl From<Hcfrq1> for u8 {
+    #[inline(always)]
+    fn from(val: Hcfrq1) -> u8 {
+        Hcfrq1::to_bits(val)
+    }
+}
+#[repr(u8)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Hcstp {
     #[doc = "HOCO is operating."]
     _0 = 0x0,

@@ -14,6 +14,11 @@ impl System {
     pub const fn as_ptr(&self) -> *mut () {
         self.ptr as _
     }
+    #[doc = "High-Speed On-Chip Oscillator Control Register 2"]
+    #[inline(always)]
+    pub const fn hococr2(self) -> crate::common::Reg<regs::Hococr2, crate::common::RW> {
+        unsafe { crate::common::Reg::from_ptr(self.ptr.wrapping_add(0x0usize) as _) }
+    }
     #[doc = "Standby Control Register"]
     #[inline(always)]
     pub const fn sbycr(self) -> crate::common::Reg<regs::Sbycr, crate::common::RW> {

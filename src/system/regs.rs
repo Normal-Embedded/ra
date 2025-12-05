@@ -196,6 +196,43 @@ impl defmt::Format for Hococr {
         defmt::write!(f, "Hococr {{ hcstp: {:?} }}", self.hcstp())
     }
 }
+#[doc = "High-Speed On-Chip Oscillator Control Register 2"]
+#[repr(transparent)]
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub struct Hococr2(pub u8);
+impl Hococr2 {
+    #[doc = "HOCO Frequency Setting 1"]
+    #[must_use]
+    #[inline(always)]
+    pub const fn hcfrq1(&self) -> super::vals::Hcfrq1 {
+        let val = (self.0 >> 3usize) & 0x07;
+        super::vals::Hcfrq1::from_bits(val as u8)
+    }
+    #[doc = "HOCO Frequency Setting 1"]
+    #[inline(always)]
+    pub const fn set_hcfrq1(&mut self, val: super::vals::Hcfrq1) {
+        self.0 = (self.0 & !(0x07 << 3usize)) | (((val.to_bits() as u8) & 0x07) << 3usize);
+    }
+}
+impl Default for Hococr2 {
+    #[inline(always)]
+    fn default() -> Hococr2 {
+        Hococr2(0)
+    }
+}
+impl core::fmt::Debug for Hococr2 {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("Hococr2")
+            .field("hcfrq1", &self.hcfrq1())
+            .finish()
+    }
+}
+#[cfg(feature = "defmt")]
+impl defmt::Format for Hococr2 {
+    fn format(&self, f: defmt::Formatter) {
+        defmt::write!(f, "Hococr2 {{ hcfrq1: {:?} }}", self.hcfrq1())
+    }
+}
 #[doc = "HOCO User Trimming Control Register"]
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq)]
